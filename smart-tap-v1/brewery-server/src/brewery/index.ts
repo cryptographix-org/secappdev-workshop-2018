@@ -89,9 +89,9 @@ let tavInfo1: TavernInfo = {
   id: "tavern-1",
   name: "TAVERN-1",
 
-  streamPublicKey: Buffer.from( "E8vT5scTaY99FXyQPP+77NBRvFTaYT/B4Qb/eMd9PFM=", BASE64 ),
+  streamPublicKey: Buffer.from( "bzukyliboDycoXu0XyQ03WkTPFTc3BWNrLqkuQAhkS8=", BASE64 ),
 
-  comments: "e88b26ce0a3a091c1fa30ee3cf3f1145b780161561953cdbc84a34fa767802e3" // SEED
+  comments: "7e3afa5bc7de22b7a69ade0f006d3795933b60727d3fa1bde6063d4f74c3d8f9" // SEED
 }
 
 tavernStore.addTavern( tavInfo1 );
@@ -99,7 +99,7 @@ tavernStore.addTavern( tavInfo1 );
 let tav1 = tavernStore.getTavern( "tavern-1" );
 console.log( tav1 );
 
-let tss = new TavernSecurityServices();
+let tss = new TavernSecurityServices( tav1.id );
 
 // init Tavern-side stream
 let initChunk = tss.initBreweryStreams();

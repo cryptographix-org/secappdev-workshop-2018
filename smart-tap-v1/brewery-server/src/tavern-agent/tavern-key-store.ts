@@ -7,17 +7,18 @@ export class TavernKeyStore {
 
   tavernStreamKeyPair: KeyPair;
 
-  constructor() {
+  constructor( tavernID: string ) {
     this.breweryStreamPublicKey = Buffer.from('72a7fa62c82277d694e37c87c1747d4977b6801876c5a5af425691e72976571c', HEX);
 
-/*    let x = Buffer.alloc( this.breweryStreamPublicKey.length );
-    Sodium.randombytes_buf( x );
+    let tavernMasterSeed = Buffer.from( 'e88b26ce0a3a091c1fa30ee3cf3f1145b780161561953cdbc84a34fa767802e3', HEX );
+    let tavernSeed = Buffer.alloc( Sodium.crypto_kx_SEEDBYTES );
 
-    console.log( "TV-SEED: " + x.toString( HEX ) );
-    this.deriveTavernStreamKeyPair( x );
-    */
 
-    this.deriveTavernStreamKeyPair( Buffer.from( 'e88b26ce0a3a091c1fa30ee3cf3f1145b780161561953cdbc84a34fa767802e3', HEX ) );
+    Sodium.crypto_kdf_derive_from_key( tavernSeed, 0, Buffer.from( tavernID, UTF8 ), tavernMasterSeed );
+
+    console.log( "TV-SEED: " + tavernSeed.toString( HEX ) );
+
+    this.deriveTavernStreamKeyPair( tavernSeed );
   }
 
   deriveTavernStreamKeyPair( tavernStreamSeed: Buffer ) {

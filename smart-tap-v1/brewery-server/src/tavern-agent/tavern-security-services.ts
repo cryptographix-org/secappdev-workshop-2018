@@ -10,8 +10,8 @@ export class TavernSecurityServices {
   tavernStreamSecretKey: Buffer;
   tavernStreamPublicKey: Buffer;
 
-  constructor() {
-    this.keyStore = new TavernKeyStore();
+  constructor( tavernID: string ) {
+    this.keyStore = new TavernKeyStore( tavernID );
   }
 
   /**
