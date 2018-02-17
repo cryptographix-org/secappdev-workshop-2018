@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "declaration": true,
+    "noImplicitAny": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "lib": [ "es2015", "dom" ],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "./dist/native-modules"
+  },
+  "include": [
+    "src/**/*",
+    "libs/**/*"
+  ],
+  "exclude": [
+    "dist",
+    "test"
+  ],
+  "atom": {
+    "rewriteTsconfig": false
+  }
+}

@@ -1,0 +1,65 @@
+[
+  {
+    "id": "sean",
+    "name": "Sean Michael Wykes",
+    "isTavernAdmin": false,
+    "isAdmin": true,
+    "salt": "B3FM3Sqeq9c0Haxt1UdV+Q==",
+    "signPublicKey": "oblEpjYptTW26XcrvKpyGirgouqiGSDNQ5uQnFMFkFo=",
+    "datagramPublicKey": "j+yB6qUnhrUthjf0GIiElSDA+OFsjoT4cL04Zk/wA3k=",
+    "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$B3FM3Sqeq9c0Haxt1UdV+Q$BqDmtJC04h7wWM3RXZt1Qi7alkM7+G+BVhZ47+9FXas",
+    "comments": "798608"
+  },
+  {
+    "id": "tavern-1",
+    "name": "Tavern 1",
+    "isTavernAdmin": false,
+    "isAdmin": false,
+    "isTavern": true,
+    "salt": "DBrjiaXv6YA/iCnvSY5lUw==",
+    "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$DBrjiaXv6YA/iCnvSY5lUw$TBQSoDGVUH/SqbCaWLVirstyAZnoxktSEn2xFOc7ReM",
+    "comments": "857713",
+    "signPublicKey": "jpJJnBsQunHX356iGDie7mmsjt43A2IEUbEoZ/5/q0o="
+  },
+  {
+    "id": "guzzler",
+    "name": "Beer Monster",
+    "isTavernAdmin": false,
+    "isAdmin": false,
+    "salt": "+j4hdvMPaiCb/hmWdC/0/w==",
+    "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$+j4hdvMPaiCb/hmWdC/0/w$6WgSJvS62EvYeHc2aarQ/WtZ09UIZXQ62EsQj85unmE",
+    "comments": "227489",
+    "signPublicKey": "zyDoCgeLUWFHxYRYX9yWntFU2SHwmyzpt8uISmqiFrU=",
+    "datagramPublicKey": "j+yB6qUnhrUthjf0GIiElSDA+OFsjoT4cL04Zk/wA3k="  
+  },
+  {
+    "id": "tippler",
+    "name": "Beer Drinker",
+    "isTavernAdmin": false,
+    "isAdmin": false,
+    "salt": "Z3NWCtroM7a+w/iaSJ3a7A==",
+    "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$Z3NWCtroM7a+w/iaSJ3a7A$hbl5MCQEUcuSjMTrJ2yMmPx3zPXESyJD2qmftavue3M",
+    "comments": "267267",
+    "signPublicKey": "w7ePv+fxEHG32d9purzTyboMNRD2Hjl2gh3QSHn4jlc="
+  },
+  {
+    "id": "taster",
+    "name": "Refined Beer Drinker",
+    "isTavernAdmin": false,
+    "isAdmin": false,
+    "salt": "OEOtoNSKgJw6S1bT5eE+dg==",
+    "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$OEOtoNSKgJw6S1bT5eE+dg$xC3/jXxbymm/iBY/XQyAnve7ColYrw6ttryqrZJ6HfA",
+    "comments": "366683",
+    "signPublicKey": "XEZfICmM82qFRhtbgjtnMLBJ9LRTbluA6OAJwJ9QSbo="
+  },
+  {
+    "id": "monky",
+    "name": "Trappist Beer Drinker",
+    "isTavernAdmin": false,
+    "isAdmin": false,
+    "salt": "rDwRHksz9fmr4NetdhDtOQ==",
+    "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$rDwRHksz9fmr4NetdhDtOQ$TtSC6QMKBxhyvKLJNFahKJpv271hYhE2YEFtBtAs+3o",
+    "comments": "219295",
+    "signPublicKey": "PErECjU5Y1bgtZ/lLqrv3mpV3H6/6/Aoy3XOFfsA6u4="
+  }
+]
