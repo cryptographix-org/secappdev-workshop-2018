@@ -50,4 +50,12 @@ declare module 'sodium-native' {
   const crypto_pwhash_MEMLIMIT_MIN = 8192;
   const crypto_pwhash_MEMLIMIT_MAX = 4398046510080;
 
+  /*class SecureBuffer extends Buffer {
+    static secureAlloc( size: number ): SecureBuffer;
+    static secureFrom( data: any, encoding: any ): SecureBuffer;
+    static makeReadOnly( buf: SecureBuffer );
+    static makeReadWrite( buf: SecureBuffer );
+    static makeNoAccess( buf: SecureBuffer );
+    static secureClean( buf: SecureBuffer );
+ }*/
 }

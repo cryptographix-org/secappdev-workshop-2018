@@ -1,6 +1,6 @@
 import * as Sodium from 'sodium-native';
 import { PublicKey, SecretKey, KeyPair } from 'sodium-native';
-import { HEX, BASE64, UTF8, allocSecureBuffer, freeSecureBuffer } from '../common/utils';
+import { HEX, BASE64, UTF8, SecureBuffer  } from '../common/utils';
 
 import { TavernKeyStore } from './tavern-key-store';
 
@@ -18,8 +18,8 @@ export class TavernSecurityServices {
    *
   **/
   deriveTavernStreamKeys( ): { txStreamSecretKey: SecretKey, rxStreamSecretKey: SecretKey } {
-    let txStreamSecretKey: SecretKey = Buffer.alloc( Sodium.crypto_secretstream_xchacha20poly1305_KEYBYTES );
-    let rxStreamSecretKey: SecretKey = Buffer.alloc( Sodium.crypto_secretstream_xchacha20poly1305_KEYBYTES );
+    let txStreamSecretKey: SecretKey = SecureBuffer.alloc( Sodium.crypto_secretstream_xchacha20poly1305_KEYBYTES );
+    let rxStreamSecretKey: SecretKey = SecureBuffer.alloc( Sodium.crypto_secretstream_xchacha20poly1305_KEYBYTES );
 
     Sodium.crypto_kx_client_session_keys(
       rxStreamSecretKey,
@@ -40,8 +40,8 @@ export class TavernSecurityServices {
   initBreweryStreams(): Buffer {
 
     let keys = this.deriveTavernStreamKeys( );
-    console.log( "TSS:");
-    console.log( keys );
+//    console.log( "TSS:");
+//    console.log( keys );
 
     this.txStreamState = Sodium.crypto_secretstream_xchacha20poly1305_state_new();
 
@@ -59,8 +59,8 @@ export class TavernSecurityServices {
     if ( !this.rxStreamState ) {
       let keys = this.deriveTavernStreamKeys( );
 
-      console.log( "TSS:");
-      console.log( keys );
+      // console.log( "TSS:");
+      // console.log( keys );
 
       this.rxStreamState = Sodium.crypto_secretstream_xchacha20poly1305_state_new();
 

@@ -16,7 +16,7 @@ export class TavernKeyStore {
 
     Sodium.crypto_kdf_derive_from_key( tavernSeed, 0, Buffer.from( tavernID, UTF8 ), tavernMasterSeed );
 
-    console.log( "TV-SEED: " + tavernSeed.toString( HEX ) );
+    //console.log( "TV-SEED: " + tavernSeed.toString( HEX ) );
 
     this.deriveTavernStreamKeyPair( tavernSeed );
   }
@@ -32,7 +32,7 @@ export class TavernKeyStore {
       this.tavernStreamKeyPair.SecretKey,
       tavernStreamSeed );
 
-    console.log( "TV-PK: " + this.tavernStreamKeyPair.PublicKey.toString( BASE64 ) );
+    //console.log( "TV-PK: " + this.tavernStreamKeyPair.PublicKey.toString( BASE64 ) );
   }
 
 }

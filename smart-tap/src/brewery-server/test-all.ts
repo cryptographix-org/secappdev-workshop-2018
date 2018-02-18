@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as Sodium from 'sodium-native';
 
 import { HEX, BASE64, UTF8 } from '../common/utils';
+import { Logger } from '../common/logger';
 
 import { BreweryKeyStore } from './brewery-key-store';
 import { SessionStore } from './session-store';
@@ -40,26 +41,35 @@ let uss = new UserSecurityServices( testUser );
 /**
  * Test login strategyA (sealedBox)
 **/
+Logger.logInfo( "Login (sealedLogin) User ", testUser );
 let sealedBox = uss.buildLoginA( session.challenge, '227489' );
 
 let ok = session.authenticateSessionA( sealedBox );
-if ( !ok )
-  console.log( "Not Authenticated B" )
+if ( ok )
+  Logger.logInfo( "User ", testUser, " authenticated OK (sealedLogin)" )
+else
+  Logger.logInfo( "Not Authenticated (sealedLogin)" )
 
+Logger.logInfo( );
 
 /**
  * Test login strategyB (signedBox)
 **/
+Logger.logInfo( "Login (signedLogin) User ", testUser );
 let signedBox = uss.buildLoginB( session.challenge, session.user.salt, '227489' );
 
 ok = session.authenticateSessionB( signedBox );
-if ( !ok )
-  console.log( "Not Authenticated B" )
+if ( ok )
+  Logger.logInfo( "User ", testUser, " authenticated OK (signedLogin)" )
+else
+  Logger.logInfo( "Not Authenticated (signedLogin)" )
 
+Logger.logInfo( );
 
 /**
  * Test user secureDatagram communication (to/from server)
 **/
+Logger.logInfo( "Secure Datagrams - User ", testUser );
 let nonce = uss.buildNonce();
 
 let msg1 = { message: "hello" };
@@ -68,7 +78,7 @@ let userDatagram = uss.wrapSecureDatagram( msg1, nonce );
 
 let in1 = session.upwrapSecureDatagram( userDatagram, nonce );
 
-console.log( "Server Received: " + JSON.stringify( in1 ) );
+Logger.logInfo( "Server Received: " + JSON.stringify( in1 ) );
 
 nonce = uss.buildNonce();
 
@@ -78,7 +88,9 @@ let svrDatagram = session.wrapSecureDatagram( msg2, nonce );
 
 let in2 = uss.upwrapSecureDatagram( svrDatagram, nonce );
 
-console.log( "User Received: " + JSON.stringify( in2 ) );
+Logger.logInfo( "User Received: " + JSON.stringify( in2 ) );
+
+Logger.logInfo( );
 
 /**
  * Test tavern stream communication
@@ -92,6 +104,8 @@ let tavInfo1: TavernInfo = {
 
   comments: "7e3afa5bc7de22b7a69ade0f006d3795933b60727d3fa1bde6063d4f74c3d8f9" // SEED
 }
+
+Logger.logInfo( "SecureStream - Tavern ", tavInfo1.id );
 
 tavernStore.addTavern( tavInfo1 );
 
@@ -109,18 +123,16 @@ let brewChunk = tav1.initTavernStreams( initChunk );
 tss.processServerChunk( brewChunk );
 
 let m1Chunk = tss.buildServerChunk( Buffer.from( JSON.stringify( { message: "secret message" }), UTF8 ) );
-console.log( "Chunk: " + m1Chunk.toString( HEX ) );
-console.log( "     : " + m1Chunk.toString( UTF8 ) );
+Logger.logDebug( "Chunk: " + m1Chunk.toString( HEX ) );
+//Logger.logDebug( "     : " + m1Chunk.toString( ) );
 let m1Plain = tav1.processClientChunk( m1Chunk );
-console.log( "Plain: " + m1Plain.toString( UTF8 ) );
+Logger.logDebug( "Plain: " + m1Plain.toString( UTF8 ) );
 
 let m2Chunk = tav1.buildClientChunk( Buffer.from( JSON.stringify( { message: "secret reply" }), UTF8 ) );
-console.log( "Chunk: " + m2Chunk.toString( HEX ) );
-console.log( "     : " + m2Chunk.toString( UTF8 ) );
+Logger.logDebug( "Chunk: " + m2Chunk.toString( HEX ) );
+//Logger.logDebug( "     : " + m2Chunk.toString( ) );
 let m2Plain = tss.processServerChunk( m2Chunk );
-console.log( "Plain: " + m2Plain.toString( UTF8 ) );
-
-
+Logger.logDebug( "Plain: " + m2Plain.toString( UTF8 ) );
 
 
 
@@ -140,7 +152,7 @@ var bool = crypto_auth_verify(output, input, key);
 
 sodium.crypto_secretbox_easy(cipher, message, nonce, key)
 
-console.log('Encrypted message:', cipher)
+Logger.logInfo('Encrypted message:', cipher)
 
 var plainText = new Buffer(cipher.length - sodium.crypto_secretbox_MACBYTES)
 

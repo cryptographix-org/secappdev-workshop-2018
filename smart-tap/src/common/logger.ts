@@ -4,7 +4,7 @@ export class Logger {
   }
 
   static logInfo( ...str: string[] ) {
-    console.log( " INFO: " + str.join('') );
+    console.log( ": " + str.join('') );
   }
 
   static logDebug( ...str: string[] ) {

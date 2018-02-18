@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 
+import * as Sodium from '../common/sodium';
 import { Logger } from '../common/logger';
 import { HEX, BASE64, UTF8 } from '../common/utils';
 
@@ -22,10 +23,10 @@ let httpServer = express()
     res.sendFile( 'index.html', { root: './public/smart-tap/' } );
   });
 
-httpServer.get('/info', (req,res) => {
+httpServer.get('/info', (req,res)=> {
 
   let sessions = [];
-  brewery.sessionStore.sessions.forEach( (session) => {
+  brewery.sessionStore.sessions.forEach( (session)=> {
     let s = {
       id: session.id,
       user: session.user && session.user.id,
@@ -48,31 +49,27 @@ httpServer.get('/info', (req,res) => {
   res.json( info );
 });
 
-httpServer.get( '/login/:userID', (req,res) => {
-  let userID = req.params.userID;
-  let session = brewery.sessionStore.createSession( userID );
+function setError( res, msg ) {
+  let json = { error: msg };
 
-  Logger.logDebug( "GET /login/", userID );
-
-  let json = {
-    sessionID: session.id,
-    challenge: session.challenge.toString( BASE64 ),
-    salt: session.user.salt.toString( BASE64 ),
-  };
-
-  Logger.logDebug( " => ", JSON.stringify( json ) );
-
+  Logger.logDebug( "=> ", JSON.stringify( json ) );
   res.json( json );
-});
 
-function checkUserSession( req, res, userID? ): Session {
+  return;
+}
+
+function checkJSON( req, res ): any {
   if ( !req.is('json') ) {
     res.status( 400 ).send( 'JSON expected');
 
     return null;
   }
 
-  let post = req.body;
+  return req.body;
+}
+
+function checkUserSession( req, res, userID? ): Session {
+  let post = checkJSON( req, res );
 
   let session: Session;
 
@@ -82,7 +79,7 @@ function checkUserSession( req, res, userID? ): Session {
     session = brewery.sessionStore.lookupSession( post.sessionID );
 
   if ( !session || !post.sessionID || ( post.sessionID != session.id )) {
-    res.json( { error: 'Invalid session' } );
+    setError( res, 'Missing Credentials' );
 
     return null;
   }
@@ -90,18 +87,52 @@ function checkUserSession( req, res, userID? ): Session {
   return session;
 }
 
-httpServer.post( '/login/:userID', (req,res) => {
-  let userID = req.params.userID;
-  let session = checkUserSession( req, res, userID );
-
-  let post = req.body;
-
-  let ok = false;
-  let authType: string;
-
+httpServer.get( '/login/:userID', (req,res)=> {
   try {
-    Logger.logDebug( "POST /login/", userID );
-    Logger.logDebug( "  <= ", JSON.stringify( post ) );
+    let userID = req.params.userID;
+    Logger.logInfo( "GET /login/", userID );
+
+    if ( !brewery.userStore.getUser( userID ) ) {
+      return setError( res, 'User not found' );
+    }
+
+    let session = brewery.sessionStore.createSession( userID );
+
+    let json = {
+      sessionID: session.id,
+      challenge: session.challenge.toString( BASE64 ),
+      salt: session.user.salt.toString( BASE64 ),
+    };
+
+    Logger.logInfo( "=> ", JSON.stringify( json ) );
+
+    res.json( json );
+  }
+  catch( e ) {
+    Logger.logError( e );
+    res.status( 500 ).send( e.toString() + "\n" + e.stack );
+
+    return;
+  }
+});
+
+httpServer.post( '/login/:userID', (req,res)=> {
+  try {
+    let userID = req.params.userID;
+    Logger.logInfo( "POST /login/", userID );
+
+    let post = checkJSON( req, res );
+    if ( !post )
+      return;
+
+    Logger.logInfo( " <= ", JSON.stringify( post ) );
+
+    let session = checkUserSession( req, res, userID );
+    if ( !session )
+      return;
+
+    let ok = false;
+    let authType: string;
 
     if ( post.sealedLogin ) {
       ok = session.authenticateSessionA( Buffer.from( post.sealedLogin, BASE64 ) );
@@ -112,13 +143,11 @@ httpServer.post( '/login/:userID', (req,res) => {
       authType = "B";
     }
     else {
-      res.status( 202 );
-
-      return;
+      return setError( res, 'Missing Credentials' );
     }
 
     let json = { authenticated: ok, authType };
-    Logger.logDebug( "  => ", JSON.stringify( json ) );
+    Logger.logInfo( " => ", JSON.stringify( json ) );
 
     res.json( json );
   }
@@ -130,18 +159,23 @@ httpServer.post( '/login/:userID', (req,res) => {
   }
 } );
 
-httpServer.post( '/wallet/:userID', (req,res) => {
-  let userID = req.params.userID;
-  let session = checkUserSession( req, res, userID );
-
-  let post = req.body;
-
-  let ok = false;
-  let rxDatagram;
-
+httpServer.post( '/wallet/:userID', (req,res)=> {
   try {
-    Logger.logDebug( "POST /wallet/", userID );
-    Logger.logDebug( "  <= ", JSON.stringify( post ) );
+    let userID = req.params.userID;
+    Logger.logInfo( "POST /wallet/", userID );
+
+    let post = checkJSON( req, res );
+    if ( !post )
+      return;
+
+    Logger.logInfo( " <= ", JSON.stringify( post ) );
+
+    let session = checkUserSession( req, res, userID );
+    if ( !session )
+      return;
+
+    let ok = false;
+    let rxDatagram;
 
     if ( post.secureDatagram && post.nonce ) {
       rxDatagram = session.upwrapSecureDatagram( Buffer.from( post.secureDatagram, BASE64 ), Buffer.from( post.nonce, BASE64 ) );
@@ -150,13 +184,11 @@ httpServer.post( '/wallet/:userID', (req,res) => {
         Logger.logDebug( "  == ", JSON.stringify( rxDatagram ) );
     }
     else {
-      res.status( 202 );
-
-      return;
+      return setError( res, 'Missing Data' );
     }
 
     let json = { message: rxDatagram };
-    Logger.logDebug( "  => ", JSON.stringify( json ) );
+    Logger.logInfo( " => ", JSON.stringify( json ) );
 
     res.json( json );
   }

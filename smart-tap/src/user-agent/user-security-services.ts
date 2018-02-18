@@ -1,6 +1,6 @@
 import * as Sodium from 'sodium-native';
 import { PublicKey, SecretKey, KeyPair } from 'sodium-native';
-import { HEX, BASE64, UTF8, allocSecureBuffer, freeSecureBuffer } from '../common/utils';
+import { HEX, BASE64, UTF8, SecureBuffer } from '../common/utils';
 
 import { UserKeyStore } from './user-key-store';
 
@@ -28,6 +28,7 @@ export class UserSecurityServices {
     Sodium.randombytes_buf( userDatagramSeed );
 
     this.deriveUserDatagramKeys( userDatagramSeed );
+    userDatagramSeed.fill( 0 );
 
     let loginInfo = {
       userID: this.userID,
@@ -35,8 +36,6 @@ export class UserSecurityServices {
       challenge: challenge.toString( BASE64 ),
       userDatagramPublicKey: this.userDatagramPublicKey
     };
-
-    //console.log( loginInfo );
 
     let loginPayload = Buffer.from( JSON.stringify( loginInfo ), UTF8 );
 
@@ -59,10 +58,12 @@ export class UserSecurityServices {
       Sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
       Sodium.crypto_pwhash_ALG_DEFAULT );
 
-    pwBuf.fill( 0 );
-
     this.deriveUserDatagramKeys( pwHash.slice( 0, Sodium.crypto_box_SEEDBYTES ) );
     this.deriveUserSignatureKeys( pwHash.slice( Sodium.crypto_box_SEEDBYTES ) );
+
+    // Cleanup
+    pwBuf.fill( 0 );
+    pwHash.fill( 0 );
 
     let message = {
       userID: this.userID,
@@ -84,7 +85,7 @@ export class UserSecurityServices {
 
     Sodium.crypto_box_seed_keypair( this.userDatagramPublicKey, this.userDatagramSecretKey, userDatagramSeed );
 
-    console.log( "UDG-PK: " + this.userDatagramPublicKey.toString( BASE64 ) )
+    //console.log( "UDG-PK: " + this.userDatagramPublicKey.toString( BASE64 ) )
   }
 
   deriveUserSignatureKeys( userSignatureSeed: Buffer ) {

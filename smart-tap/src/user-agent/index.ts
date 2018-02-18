@@ -1,3 +1,5 @@
+import * as Sodium from '../common/sodium';
+
 import { Logger } from '../common/logger';
 import { HEX, BASE64, UTF8 } from '../common/utils';
 

@@ -83,8 +83,8 @@ export class Tavern extends TavernInfo {
   initTavernStreams( initChunk: Buffer ): Buffer {
 
     let keys = this.deriveTavernStreamKeys( this.keyStore.breweryTavernKeys );
-    console.log( "TavernStore:");
-    console.log( keys );
+    //console.log( "TavernStore:");
+    //console.log( keys );
 
     // Init stream-from-tavern
     this.rxStreamState = Sodium.crypto_secretstream_xchacha20poly1305_state_new();
