@@ -2,11 +2,13 @@ import * as Sodium from 'sodium-native';
 import { PublicKey, SecretKey } from 'sodium-native';
 import { HEX, BASE64, UTF8 } from '../common/utils';
 
+import { UserSecurityServices } from '../user-agent/user-security-services';
+
 export class UserInfo {
   id: string;
   name: string;
 
-  comments: string;
+  comments?: string;
 
   isTavernAdmin?: boolean = false;
   isAdmin?: boolean = false;
@@ -15,6 +17,7 @@ export class UserInfo {
 
   salt?: Buffer;
   signPublicKey?: PublicKey;
+  
   datagramPublicKey?: PublicKey;
 }
 
@@ -43,6 +46,17 @@ export class User extends UserInfo {
     this.passwordHash = pwHash.slice(0, i).toString( UTF8 );
 
     pwBuf.fill( 0 );
+
+    // Separate SALT from string
+    let salt = this.passwordHash.split('$')[ 4 ];
+
+    this.salt = Buffer.from( salt, BASE64 );
+
+    // and recalculate Signature PublicKey
+    let uss = new UserSecurityServices( this.id );
+    uss.buildLoginB( Buffer.alloc( 0 ), this.salt, password );
+
+    this.signPublicKey = uss.userSignaturePublicKey;
   }
 
   verifyPassword( password: string ): boolean {
