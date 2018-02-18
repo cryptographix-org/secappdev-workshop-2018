@@ -4,9 +4,11 @@ import * as fs from 'fs';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 
+import { Logger } from '../common/logger';
 import { HEX, BASE64, UTF8 } from '../common/utils';
 
 import { BreweryServices } from './brewery-services';
+import { Session } from './session-store';
 
 let initUsers = require( path.resolve( 'user-base.json' ) );
 
@@ -21,12 +23,6 @@ let httpServer = express()
   });
 
 httpServer.get('/info', (req,res) => {
-  let info: Object = {
-    info: "Brewery Server",
-    version: "v1",
-    totalSessions: brewery.sessionStore.countSessions(),
-    authSessions: brewery.sessionStore.countSessions( true ),
-  };
 
   let sessions = [];
   brewery.sessionStore.sessions.forEach( (session) => {
@@ -38,53 +34,81 @@ httpServer.get('/info', (req,res) => {
 
     sessions.push( s );
   })
-  info = {
-    ...info,
-    sessions
-  }
+
+  let info = {
+    info: "IoB Brewery Server",
+    version: "v1",
+    totalSessions: brewery.sessionStore.countSessions(),
+    authSessions: brewery.sessionStore.countSessions( true ),
+    sessions,
+  };
+
+  Logger.logDebug( "Info: ", JSON.stringify( info ) );
 
   res.json( info );
 });
 
 httpServer.get( '/login/:userID', (req,res) => {
-  let session = brewery.sessionStore.createSession( req.params.userID );
+  let userID = req.params.userID;
+  let session = brewery.sessionStore.createSession( userID );
 
-  console.log( req.params );
-  res.json( {
+  Logger.logDebug( "GET /login/", userID );
+
+  let json = {
     sessionID: session.id,
-    challenge: session.challenge.toString( BASE64 )
-  } );
+    challenge: session.challenge.toString( BASE64 ),
+    salt: session.user.salt.toString( BASE64 ),
+  };
+
+  Logger.logDebug( " => ", JSON.stringify( json ) );
+
+  res.json( json );
 });
 
-httpServer.post( '/login/:userID', (req,res) => {
-  let session = brewery.sessionStore.lookupSessionForUser( req.params.userID );
-
+function checkUserSession( req, res, userID? ): Session {
   if ( !req.is('json') ) {
     res.status( 400 ).send( 'JSON expected');
 
-    return;
+    return null;
   }
 
   let post = req.body;
 
+  let session: Session;
+
+  if ( userID )
+    session = brewery.sessionStore.lookupSessionForUser( userID );
+  else
+    session = brewery.sessionStore.lookupSession( post.sessionID );
+
   if ( !session || !post.sessionID || ( post.sessionID != session.id )) {
     res.json( { error: 'Invalid session' } );
 
-    return;
+    return null;
   }
+
+  return session;
+}
+
+httpServer.post( '/login/:userID', (req,res) => {
+  let userID = req.params.userID;
+  let session = checkUserSession( req, res, userID );
+
+  let post = req.body;
 
   let ok = false;
   let authType: string;
 
   try {
-    console.log( post );
+    Logger.logDebug( "POST /login/", userID );
+    Logger.logDebug( "  <= ", JSON.stringify( post ) );
 
     if ( post.sealedLogin ) {
-      ok = session.authenticateSessionA( Buffer.from( post.sealedLogin ) );
+      ok = session.authenticateSessionA( Buffer.from( post.sealedLogin, BASE64 ) );
       authType = "A";
     }
     else if ( post.signedLogin ) {
-      ok = session.authenticateSessionB( Buffer.from( post.signedLogin ) );
+      ok = session.authenticateSessionB( Buffer.from( post.signedLogin, BASE64 ) );
       authType = "B";
     }
     else {
@@ -93,16 +117,56 @@ httpServer.post( '/login/:userID', (req,res) => {
       return;
     }
 
-    res.json( { authenticated: ok, authType } );
+    let json = { authenticated: ok, authType };
+    Logger.logDebug( "  => ", JSON.stringify( json ) );
+
+    res.json( json );
   }
   catch( e ) {
-    console.log( e );
+    Logger.logError( e );
     res.status( 500 ).send( e.toString() + "\n" + e.stack );
 
     return;
   }
+} );
 
+httpServer.post( '/wallet/:userID', (req,res) => {
+  let userID = req.params.userID;
+  let session = checkUserSession( req, res, userID );
+
+  let post = req.body;
+
+  let ok = false;
+  let rxDatagram;
+
+  try {
+    Logger.logDebug( "POST /wallet/", userID );
+    Logger.logDebug( "  <= ", JSON.stringify( post ) );
+
+    if ( post.secureDatagram && post.nonce ) {
+      rxDatagram = session.upwrapSecureDatagram( Buffer.from( post.secureDatagram, BASE64 ), Buffer.from( post.nonce, BASE64 ) );
+
+      if ( rxDatagram )
+        Logger.logDebug( "  == ", JSON.stringify( rxDatagram ) );
+    }
+    else {
+      res.status( 202 );
+
+      return;
+    }
+
+    let json = { message: rxDatagram };
+    Logger.logDebug( "  => ", JSON.stringify( json ) );
+
+    res.json( json );
+  }
+  catch( e ) {
+    Logger.logError( e );
+    res.status( 500 ).send( e.toString() + "\n" + e.stack );
+
+    return;
+  }
 });
 
-
 let listenerUI = httpServer.listen( 8080 );
+Logger.logInfo( "IoB BreweryServer listening on port " + listenerUI.address().port );

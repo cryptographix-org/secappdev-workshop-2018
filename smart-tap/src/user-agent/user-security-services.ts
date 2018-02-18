@@ -7,17 +7,21 @@ import { UserKeyStore } from './user-key-store';
 export class UserSecurityServices {
   keyStore: UserKeyStore;
 
+  userID: string;
+
   userDatagramSecretKey: Buffer;
   userDatagramPublicKey: Buffer;
 
   userSignatureSecretKey: Buffer;
   userSignaturePublicKey: Buffer;
 
-  constructor() {
+  constructor( userID: string ) {
     this.keyStore = new UserKeyStore();
+
+    this.userID = userID;
   }
 
-  buildLoginA( userID: string, challenge: Buffer, password: string ): Buffer {
+  buildLoginA( challenge: Buffer, password: string ): Buffer {
 
     // Generate a random Datagram key for this session
     let userDatagramSeed = Buffer.alloc( Sodium.crypto_box_SEEDBYTES );
@@ -26,7 +30,7 @@ export class UserSecurityServices {
     this.deriveUserDatagramKeys( userDatagramSeed );
 
     let loginInfo = {
-      userID,
+      userID: this.userID,
       password,
       challenge: challenge.toString( BASE64 ),
       userDatagramPublicKey: this.userDatagramPublicKey
@@ -43,7 +47,7 @@ export class UserSecurityServices {
     return box;
   }
 
-  buildLoginB( userID: string, challenge: Buffer, salt: Buffer, password: string ) {
+  buildLoginB( challenge: Buffer, salt: Buffer, password: string ) {
     let pwBuf = Buffer.from( password, UTF8 );
     let pwHash = Buffer.alloc( Sodium.crypto_box_SEEDBYTES + Sodium.crypto_sign_SEEDBYTES );
 
@@ -61,7 +65,7 @@ export class UserSecurityServices {
     this.deriveUserSignatureKeys( pwHash.slice( Sodium.crypto_box_SEEDBYTES ) );
 
     let message = {
-      userID,
+      userID: this.userID,
       challenge: challenge.toString( BASE64 )
     };
 
