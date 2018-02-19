@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "test": "node dist/native-modules/brewery-server/test-all.js",
+    "debug": "node --inspect-brk dist/native-modules/brewery-server/http-server.js",
     "serve": "node dist/native-modules/brewery-server/http-server.js"
   },
   "dependencies": {

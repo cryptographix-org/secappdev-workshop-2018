@@ -87,6 +87,31 @@ function checkUserSession( req, res, userID? ): Session {
   return session;
 }
 
+httpServer.post( '/echo', (req,res)=> {
+  try {
+    Logger.logInfo( "POST /echo/" );
+
+    let post = checkJSON( req, res );
+    if ( !post )
+      return;
+
+    Logger.logInfo( " <= ", JSON.stringify( post ) );
+
+    let json = post;
+    Logger.logInfo( " => ", JSON.stringify( json ) );
+
+    res.json( json );
+  }
+  catch( e ) {
+    Logger.logError( e );
+    res.status( 500 ).send( e.toString() + "\n" + e.stack );
+
+    return;
+  }
+} );
+
+
+
 httpServer.get( '/login/:userID', (req,res)=> {
   try {
     let userID = req.params.userID;
