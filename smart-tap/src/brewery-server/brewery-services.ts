@@ -25,14 +25,14 @@ export class BreweryServices {
   //
   tavernStore: TavernStore;
 
-  constructor( initUsers?: UserInfo[] ) {
+  constructor( initUsers?: UserInfo[], initTaverns?: TavernInfo[] ) {
     this.keyStore = new BreweryKeyStore();
 
     this.userStore = new UserStore( initUsers );
 
     this.sessionStore = new SessionStore( this.keyStore, this.userStore );
 
-    this.tavernStore = new TavernStore( this.keyStore );
+    this.tavernStore = new TavernStore( this.keyStore, initTaverns );
   }
 
   checkUsers(): boolean {

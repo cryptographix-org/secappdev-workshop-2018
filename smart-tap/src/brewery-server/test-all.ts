@@ -20,16 +20,18 @@ let initUsers = require( path.resolve( 'user-base.json' ) );
 
 let brewery = new BreweryServices( initUsers )
 
-if ( 0 ) {
+//let testUser = 'guzzler', testPass = '227489';
+let testUser = 'sean', testPass = '798608';
 
-  if ( brewery.checkUsers() ) {
+if ( 0 ) {
+  brewery.userStore.getUser(testUser).setPassword(testPass);
+
+  //if ( brewery.checkUsers() ) {
 
     fs.writeFileSync( path.resolve( 'user-base.json' ),
       JSON.stringify( brewery.userStore.toJSON(), null, 2 ), UTF8 );
-  }
+  //}
 }
-
-let testUser = 'guzzler';
 
 let sessionStore = brewery.sessionStore;
 
@@ -42,7 +44,7 @@ let uss = new UserSecurityServices( testUser );
  * Test login strategyA (sealedBox)
 **/
 Logger.logInfo( "Login (sealedLogin) User ", testUser );
-let sealedBox = uss.buildLoginA( session.challenge, '227489' );
+let sealedBox = uss.buildLoginA( session.challenge, testPass );
 
 let ok = session.authenticateSessionA( sealedBox );
 if ( ok )
@@ -56,7 +58,7 @@ Logger.logInfo( );
  * Test login strategyB (signedBox)
 **/
 Logger.logInfo( "Login (signedLogin) User ", testUser );
-let signedBox = uss.buildLoginB( session.challenge, session.user.salt, '227489' );
+let signedBox = uss.buildLoginB( session.challenge, session.user.salt, testPass );
 
 ok = session.authenticateSessionB( signedBox );
 if ( ok )

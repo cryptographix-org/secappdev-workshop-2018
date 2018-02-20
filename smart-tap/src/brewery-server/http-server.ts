@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 
-import * as Sodium from '../common/sodium';
+import * as Sodium from 'sodium-native';
 import { Logger } from '../common/logger';
 import { HEX, BASE64, UTF8 } from '../common/utils';
 
@@ -12,8 +12,9 @@ import { BreweryServices } from './brewery-services';
 import { Session } from './session-store';
 
 let initUsers = require( path.resolve( 'user-base.json' ) );
+let initTaverns = require( path.resolve( 'tavern-base.json' ) );
 
-let brewery = new BreweryServices( initUsers );
+let brewery = new BreweryServices( initUsers, initTaverns );
 
 let httpServer = express()
   .use(bodyParser.json())
@@ -207,12 +208,198 @@ httpServer.post( '/wallet/:userID', (req,res)=> {
 
       if ( rxDatagram )
         Logger.logDebug( "  == ", JSON.stringify( rxDatagram ) );
+
+      if ( rxDatagram.method == 'Greeting' )
+        rxDatagram.param = 'Aangenaam kennis te maken, libsodium ninja';
     }
     else {
       return setError( res, 'Missing Data' );
     }
 
     let json = { message: rxDatagram };
+    Logger.logInfo( " => ", JSON.stringify( json ) );
+
+    res.json( json );
+  }
+  catch( e ) {
+    Logger.logError( e );
+    res.status( 500 ).send( e.toString() + "\n" + e.stack );
+
+    return;
+  }
+});
+
+httpServer.get( '/user/:userID', (req,res)=> {
+  try {
+    let userID = req.params.userID;
+    Logger.logInfo( "get /user/", userID );
+
+    let user = brewery.userStore.getUser( userID );
+    if (!user) {
+      return setError( res, 'Missing Data' );
+    }
+
+    let json = user;
+    Logger.logInfo( " => ", JSON.stringify( json ) );
+
+    res.json( json );
+  }
+  catch( e ) {
+    Logger.logError( e );
+    res.status( 500 ).send( e.toString() + "\n" + e.stack );
+
+    return;
+  }
+});
+
+httpServer.post( '/user/:userID/add', (req,res)=> {
+  try {
+    let userID = req.params.userID;
+    Logger.logInfo( "POST /user/", userID, '/add' );
+
+    let post = checkJSON( req, res );
+    if ( !post )
+      return;
+
+    Logger.logInfo( " <= ", JSON.stringify( post ) );
+
+    let session = checkUserSession( req, res, 'sean' );
+    if ( !session )
+      return;
+
+    if ( post.name ) {
+      brewery.userStore.addUser( {
+        id: userID,
+        name: post.name
+      } );
+
+      if ( post.password )
+        brewery.userStore.getUser( userID ).setPassword( post.password );
+    }
+    else if ( post.password ) {
+      brewery.userStore.getUser( userID ).setPassword( post.password );
+    }
+    else {
+      return setError( res, 'Missing Data' );
+    }
+
+    let json = { success: 'OK' };
+    Logger.logInfo( " => ", JSON.stringify( json ) );
+
+    res.json( json );
+
+    fs.writeFileSync( path.resolve( 'user-base.json' ),
+      JSON.stringify( brewery.userStore.toJSON(), null, 2 ), UTF8 );
+  }
+  catch( e ) {
+    Logger.logError( e );
+    res.status( 500 ).send( e.toString() + "\n" + e.stack );
+
+    return;
+  }
+});
+
+httpServer.get( '/tavern/:tavernID', (req,res)=> {
+  try {
+    let tavernID = req.params.tavernID;
+    Logger.logInfo( "POST /tavernID/", tavernID );
+
+    let tav = brewery.tavernStore.getTavern( tavernID );
+    if (!tav) {
+      return setError( res, 'Missing Tavern' );
+    }
+
+    //tav.deriveTavernStreamKeys( brewery.keyStore.breweryTavernKeys );
+
+    let json = tav;
+    Logger.logInfo( " => ", JSON.stringify( json ) );
+
+    res.json( json );
+  }
+  catch( e ) {
+    Logger.logError( e );
+    res.status( 500 ).send( e.toString() + "\n" + e.stack );
+
+    return;
+  }
+} );
+
+httpServer.post( '/tavern/:tavernID/add', (req,res)=> {
+  try {
+    let tavernID = req.params.tavernID;
+    Logger.logInfo( "POST /tavernID/", tavernID, '/add' );
+
+    let post = checkJSON( req, res );
+    if ( !post )
+      return;
+
+    Logger.logInfo( " <= ", JSON.stringify( post ) );
+
+    if ( post.name ) {
+      brewery.tavernStore.addTavern( {
+        id: tavernID,
+        name: post.name,
+        comments: post.comments,
+        streamPublicKey: post.key && Buffer.from( post.key, BASE64 )
+      } );
+    }
+    else if ( post.key ) {
+      brewery.tavernStore.getTavern( tavernID ).streamPublicKey = Buffer.from( post.key, BASE64 );
+      if ( post.comments )
+        brewery.tavernStore.getTavern( tavernID ).comments = post.comments;
+    }
+    else {
+      return setError( res, 'Missing Data' );
+    }
+
+    let json = { success: 'OK' };
+    Logger.logInfo( " => ", JSON.stringify( json ) );
+
+    fs.writeFileSync( path.resolve( 'tavern-base.json' ),
+      JSON.stringify( brewery.tavernStore.toJSON(), null, 2 ), UTF8 );
+
+    res.json( json );
+  }
+  catch( e ) {
+    Logger.logError( e );
+    res.status( 500 ).send( e.toString() + "\n" + e.stack );
+
+    return;
+  }
+} );
+
+httpServer.post( '/tavern/:tavernID', (req,res)=> {
+  try {
+    let tavernID = req.params.tavernID;
+    Logger.logInfo( "POST /tavern/", tavernID );
+
+    let post = checkJSON( req, res );
+    if ( !post )
+      return;
+
+    Logger.logInfo( " <= ", JSON.stringify( post ) );
+
+    let tav = brewery.tavernStore.getTavern( tavernID );
+    if ( !tav )
+      return setError( res, 'Unknown Tavern' );;
+
+    let outChunk, inData;
+
+    if ( post.chunk ) {
+
+      if ( !tav.txStreamState )
+        outChunk = tav.initTavernStreams( Buffer.from( post.chunk, BASE64 ) );
+      else
+        inData = tav.processClientChunk( Buffer.from( post.chunk, BASE64 ) );
+    }
+
+    if ( !outChunk ) {
+      let outData = "SERVER SAYS: " + Sodium. randombytes_uniform( 1000 );
+
+      outChunk = tav.buildClientChunk( Buffer.from( outData, BASE64 ) );
+    }
+
+    let json = { success: 'OK', chunk: outChunk.toString( BASE64) };
     Logger.logInfo( " => ", JSON.stringify( json ) );
 
     res.json( json );

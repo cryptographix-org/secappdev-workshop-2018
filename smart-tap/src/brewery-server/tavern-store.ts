@@ -40,6 +40,7 @@ export class Tavern extends TavernInfo {
       ... (this as TavernInfo),
 
       streamPublicKey: (this.streamPublicKey)? this.streamPublicKey.toString( BASE64 ) : undefined,
+      keyStore: undefined,
     }
 
     return json;

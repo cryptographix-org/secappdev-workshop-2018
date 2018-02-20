@@ -4,10 +4,10 @@
     "name": "Sean Michael Wykes",
     "isTavernAdmin": false,
     "isAdmin": true,
-    "salt": "B3FM3Sqeq9c0Haxt1UdV+Q==",
-    "signPublicKey": "oblEpjYptTW26XcrvKpyGirgouqiGSDNQ5uQnFMFkFo=",
-    "datagramPublicKey": "j+yB6qUnhrUthjf0GIiElSDA+OFsjoT4cL04Zk/wA3k=",
-    "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$B3FM3Sqeq9c0Haxt1UdV+Q$BqDmtJC04h7wWM3RXZt1Qi7alkM7+G+BVhZ47+9FXas",
+    "salt": "ParWPT5dYAi43mrWCskewQ==",
+    "signPublicKey": "EUV2GYPl+BvR9J/gnsMvFbbFGboVEPZTVARxLeLC7rE=",
+    "datagramPublicKey": "o4jwhn4C+L9jsaryxwj47PhFoVUlG+bamQ4OcQ3Rgxk=",
+    "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$ParWPT5dYAi43mrWCskewQ$pYUVCEidrrsja0W1RvMy8gDibFxgIZFKE5SnL+PcOsU",
     "comments": "798608"
   },
   {
@@ -30,7 +30,7 @@
     "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$+j4hdvMPaiCb/hmWdC/0/w$6WgSJvS62EvYeHc2aarQ/WtZ09UIZXQ62EsQj85unmE",
     "comments": "227489",
     "signPublicKey": "zyDoCgeLUWFHxYRYX9yWntFU2SHwmyzpt8uISmqiFrU=",
-    "datagramPublicKey": "j+yB6qUnhrUthjf0GIiElSDA+OFsjoT4cL04Zk/wA3k="  
+    "datagramPublicKey": "j+yB6qUnhrUthjf0GIiElSDA+OFsjoT4cL04Zk/wA3k="
   },
   {
     "id": "tippler",

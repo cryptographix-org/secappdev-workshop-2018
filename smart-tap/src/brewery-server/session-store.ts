@@ -127,7 +127,7 @@ export class Session {
     let unwrappedBox = Buffer.alloc( wrappedBox.length - Sodium.crypto_box_MACBYTES );
 
     Sodium.crypto_box_open_easy( unwrappedBox, wrappedBox, wrapNonce, this.userDatagramPublicKey, this.sessionStore.keyStore.breweryUserKeys.SecretKey );
-
+    console.log( "Got: " + unwrappedBox.toString( UTF8 ) );
     let unwrappedPayload = JSON.parse( unwrappedBox.toString( UTF8 ) );
 
     return unwrappedPayload;

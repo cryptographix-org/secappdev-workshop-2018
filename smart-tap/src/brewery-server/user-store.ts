@@ -17,7 +17,7 @@ export class UserInfo {
 
   salt?: Buffer;
   signPublicKey?: PublicKey;
-  
+
   datagramPublicKey?: PublicKey;
 }
 
@@ -57,6 +57,7 @@ export class User extends UserInfo {
     uss.buildLoginB( Buffer.alloc( 0 ), this.salt, password );
 
     this.signPublicKey = uss.userSignaturePublicKey;
+    this.datagramPublicKey = uss.userDatagramPublicKey;
   }
 
   verifyPassword( password: string ): boolean {
