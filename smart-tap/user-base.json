@@ -61,5 +61,26 @@
     "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$rDwRHksz9fmr4NetdhDtOQ$TtSC6QMKBxhyvKLJNFahKJpv271hYhE2YEFtBtAs+3o",
     "comments": "219295",
     "signPublicKey": "PErECjU5Y1bgtZ/lLqrv3mpV3H6/6/Aoy3XOFfsA6u4="
+  },
+  {
+    "id": "bebumzinho",
+    "name": "Bebê Bebedor",
+    "isTavernAdmin": false,
+    "isAdmin": false,
+    "signPublicKey": "OLqZsZgehSCYUGe6lKgO1ABe4R5IXm5KoFk42mxRXFY=",
+    "datagramPublicKey": "QPcpTCoKAI/DG2KGamYZ1k3DtzfhuYg9Ug0KWznmLm8=",
+    "salt": "ey7+TFcIxPkdcUMLTILfWA==",
+    "comments": "652987",
+    "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$ey7+TFcIxPkdcUMLTILfWA$pJf3ofUSx+LKsn8/g+QEMnAbo+Vu2PznNtxtj96YNW4"
+  },
+  {
+    "id": "test",
+    "name": "test user",
+    "isTavernAdmin": false,
+    "isAdmin": false,
+    "signPublicKey": "2uH/y5fEz0vu6FzRRTNjZKP5HUEkNhHDw0b2xwSd9mI=",
+    "datagramPublicKey": "THu4tR4OlqokkEmHNc9q2RZXdK5S/QGcUKMqA3vKiVk=",
+    "salt": "lqxPZtA/ghHRV+UuP5kctg==",
+    "passwordHash": "$argon2id$v=19$m=65536,t=2,p=1$lqxPZtA/ghHRV+UuP5kctg$kzGIq1w7B9+Z/tc6gOcR9LH0w/yUM0wnuUDDyuYtdag"
   }
 ]

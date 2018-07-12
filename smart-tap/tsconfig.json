@@ -13,6 +13,7 @@
     "outDir": "./dist/native-modules"
   },
   "include": [
+   "./types/index.d.ts",
     "src/**/*",
     "libs/**/*"
   ],

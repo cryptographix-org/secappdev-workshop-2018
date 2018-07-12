@@ -210,7 +210,7 @@ httpServer.post( '/wallet/:userID', (req,res)=> {
         Logger.logDebug( "  == ", JSON.stringify( rxDatagram ) );
 
       if ( rxDatagram.method == 'Greeting' )
-        rxDatagram.param = 'Aangenaam kennis te maken, libsodium ninja';
+        rxDatagram.param = 'Vida longa e próspera," + userID + ", libsodium ninja';
     }
     else {
       return setError( res, 'Missing Data' );
